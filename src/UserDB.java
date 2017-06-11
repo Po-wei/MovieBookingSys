@@ -1,12 +1,11 @@
 
-public class UserDB extends Database{
+public class UserDB extends Database
+{
 
 	@Override
-	public User queryByID(int ID) {
-		
-		
-		
+	public User queryByID(int ID)
+	{
+
 	}
-	
 
 }

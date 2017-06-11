@@ -1,4 +1,5 @@
 
-public class Hall {
+public class Hall
+{
 
 }

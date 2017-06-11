@@ -1,13 +1,13 @@
 
-public class MovieDB extends Database{
+public class MovieDB extends Database
+{
 
 	@Override
-	public Movie queryByID(int ID) {
-		
+	public Movie queryByID(int ID)
+	{
+
 		String a = "";
 		return a;
 	}
-	
-	
 
 }
