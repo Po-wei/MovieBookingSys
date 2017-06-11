@@ -1,13 +1,12 @@
 
-public class MovieDB extends Database
+public class MovieDB implements Database
 {
 
 	@Override
-	public Movie queryByID(int ID)
+	public Movie queryByID(String ID)
 	{
 
-		String a = "";
-		return a;
+
 	}
 
 }

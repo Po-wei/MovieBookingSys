@@ -1,9 +1,9 @@
 
-public class UserDB extends Database
+public class UserDB implements Database
 {
 
 	@Override
-	public User queryByID(int ID)
+	public User queryByID(String ID)
 	{
 
 	}

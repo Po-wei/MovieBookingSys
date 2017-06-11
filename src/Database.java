@@ -1,17 +1,6 @@
 
-public class Database
+public interface Database
 {
 	public static final String DBtype = "MongoDB";
-
-	Database()
-	{
-		// TODO
-		// dump data
-	}
-
-	public Object queryByID(int ID)
-	{
-		return new Object();
-	}
-
+	public Object queryByID(String ID);
 }

@@ -1,5 +1,5 @@
 
-public class HallDB extends Database
+public class HallDB implements Database
 {
 
 	@Override
