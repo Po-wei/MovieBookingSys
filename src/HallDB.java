@@ -13,12 +13,16 @@ public class HallDB implements Database
 	}
 	
 	
-	public static void Main(String[] args)
-	{
+	public static void main(String[] args) {
 		MongoClient mongoClient = new MongoClient();
-		MongoDatabase database = mongoClient.getDatabase("TheDatabaseName");
-		MongoCollection<Document> collection = database.getCollection("TheCollectionName");
-		
+		MongoDatabase database = mongoClient.getDatabase("test");
+		MongoCollection<Document> collection = database.getCollection("big_room");
+		FindIterable<Document> findIterable = collection.find();
+		MongoCursor<Document> mongoCursor = findIterable.iterator();
+		System.out.println("auto!!");
+		while (mongoCursor.hasNext()) {
+			System.out.println(mongoCursor.next());
+		}
 	}
 
 }
