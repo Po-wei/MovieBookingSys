@@ -13,12 +13,5 @@ public class HallDB implements Database
 	}
 	
 	
-	public static void Main(String[] args)
-	{
-		MongoClient mongoClient = new MongoClient();
-		MongoDatabase database = mongoClient.getDatabase("TheDatabaseName");
-		MongoCollection<Document> collection = database.getCollection("TheCollectionName");
-		
-	}
 
 }
