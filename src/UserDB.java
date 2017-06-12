@@ -7,7 +7,7 @@ public class UserDB implements Database
 
 
 	@Override
-	public User queryByID(String ID)
+	public User queryByID(String userID)
 	{
 		return null;
 	}

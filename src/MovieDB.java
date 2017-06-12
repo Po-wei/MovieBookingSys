@@ -6,7 +6,7 @@ public class MovieDB implements Database
 	public Movie queryByID(String ID)
 	{
 
-		return null;
+
 	}
 
 }
