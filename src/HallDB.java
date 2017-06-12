@@ -19,10 +19,15 @@ public class HallDB implements Database
 		MongoCollection<Document> collection = database.getCollection("big_room");
 		FindIterable<Document> findIterable = collection.find();
 		MongoCursor<Document> mongoCursor = findIterable.iterator();
+		//FindIterable<Document> findIterable =  database.getCollection("big_room");
 		System.out.println("auto!!");
 		while (mongoCursor.hasNext()) {
-			System.out.println(mongoCursor.next());
+			Document doc = mongoCursor.next();
+			System.out.println(doc.getString("row")
+					+ doc.getInteger("seatNum"));
 		}
+		MongoCollection<Document> collection2 = database.getCollection("dick_room");
+
 	}
 
 }
