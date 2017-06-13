@@ -33,7 +33,12 @@ public class HallDB implements Database
 		switch (hallType)
 		{
 			case BIG_HALL:
+
+				//database.createCollection(generateID(movieId, time));
+
+				//System.out.println(generateID(movieId, time));
 				myCollection = database.getCollection(generateID(movieId, time));
+				System.out.println(myCollection);
 				hallInit(myCollection, HallType.BIG_HALL);
 				break;
 	
@@ -67,9 +72,9 @@ public class HallDB implements Database
 	private void initialDB()
 	{
 		MongoClient mongoClient = new MongoClient();
-		MongoDatabase database = mongoClient.getDatabase("TicketSystem");
-		MongoCollection<Document> bigRoom = database.getCollection("big_room");
-		MongoCollection<Document> smallRoom = database.getCollection("small_room");
+		this.database = mongoClient.getDatabase("TicketSys");
+		this.bigRoom = database.getCollection("big_room");
+		this.smallRoom = database.getCollection("small_room");
 	}
 	
 	private void hallInit(MongoCollection<Document> myCollection, HallType hallType)
@@ -77,18 +82,36 @@ public class HallDB implements Database
 		switch(hallType)
 		{
 		case BIG_HALL:
-			database.getCollection("big_room");
-			FindIterable<Document> findIterable =myCollection.find();
-//			MongoCursor<Document> mongoCursor = findIterable.iterator();
-			for(Document document : findIterable)
-			{
-				myCollection.insertOne(document);
-			}
+			FindIterable<Document> findIterable = database.getCollection("big_room").find();
+			MongoCursor<Document> mongoCursor = findIterable.iterator();
+//			while (mongoCursor.hasNext()) {
+//				Document doc = mongoCursor.next();
+//				System.out.println(doc);
+//				myCollection.insertOne(doc);
+//
+//				//System.out.println(doc.getString("row") + doc.getInteger("seatNum"));
+//
+//			}
+			myCollection.insertOne(new Document("GG","VERY BIG"));
 			break;
 			
 		}
 	}
-	
+
+	public void test() {
+		MongoClient mongoClient = new MongoClient();
+		MongoDatabase database = mongoClient.getDatabase("test");
+		MongoCollection<Document> collection = database.getCollection("big_room");
+		FindIterable<Document> findIterable = collection.find();
+		MongoCursor<Document> mongoCursor = findIterable.iterator();
+		System.out.println("auto!!");
+		while (mongoCursor.hasNext())
+		{
+			Document doc = mongoCursor.next();
+			System.out.println(doc.getString("row") + doc.getInteger("seatNum"));
+		}
+	}
+
 	public static void main(String[] args)
 	{
 //		MongoClient mongoClient = new MongoClient();
@@ -105,9 +128,12 @@ public class HallDB implements Database
 //			System.out.println(doc.getString("row") + doc.getInteger("seatNum"));
 //		}
 //		MongoCollection<Document> collection2 = database.getCollection("dick_room");
-		
+
 		HallDB db = new HallDB();
+		//db.test();
 		db.createHall("asd", "9:30", HallType.BIG_HALL);
 
 	}
+
+
 }
