@@ -9,7 +9,7 @@ import com.sun.media.jfxmedia.control.VideoDataBuffer;
 
 public class HallDB implements Database
 {
-	private Map<String, String> HallMap;
+	//private Map<String, String> HallMap;
 	private MongoClient mongoClient;
 	private MongoDatabase database;
 	private MongoCollection<Document> bigRoom;
@@ -54,8 +54,9 @@ public class HallDB implements Database
 	}
 
 	@Override
-	public Hall queryByID(String hallID)
+	public Seat queryByID(String hallID)
 	{
+
 		return null;
 	}
 
@@ -71,10 +72,10 @@ public class HallDB implements Database
 	 */
 	private void initialDB()
 	{
-		MongoClient mongoClient = new MongoClient();
+		this.mongoClient = new MongoClient();
 		this.database = mongoClient.getDatabase("TicketSys");
-		//this.bigRoom = database.getCollection("big_room");
-		//this.smallRoom = database.getCollection("small_room");
+		this.bigRoom = database.getCollection("big_room");
+		this.smallRoom = database.getCollection("small_room");
 	}
 	
 	private void hallInit(MongoCollection<Document> myCollection, HallType hallType)
@@ -84,7 +85,7 @@ public class HallDB implements Database
 		switch(hallType)
 		{
 			case BIG_HALL:
-				findIterable = database.getCollection("big_room").find();
+				findIterable = this.bigRoom.find();
 				mongoCursor = findIterable.iterator();
 				while (mongoCursor.hasNext()) {
 					Document doc = mongoCursor.next();
@@ -98,11 +99,12 @@ public class HallDB implements Database
 				break;
 
 			case SMALL_HALL:
-				findIterable = database.getCollection("small_room").find();
+				findIterable = this.smallRoom.find();
 				mongoCursor = findIterable.iterator();
 				while (mongoCursor.hasNext()) {
-					Document doc = mongoCursor.next();
-					myCollection.insertOne(doc);
+					//Document doc = mongoCursor.next();
+					//myCollection.insertOne(doc);
+					//myCollection.insertOne(new Document("GG","VERY BIG"));
 				}
 				break;
 
@@ -116,7 +118,14 @@ public class HallDB implements Database
 	public static void main(String[] args)
 	{
 		HallDB db = new HallDB();
-		db.createHall("asd", "9:30", HallType.SMALL_HALL);
+		//db.createHall("asd", "9:30", HallType.SMALL_HALL);
+
+
+		MongoCollection<Document> myCollection
+				= db.database.getCollection(db.generateID("asd", "9:30"));
+		myCollection.insertOne(new Document("GG","VERY BIG"));
+
+
 
 	}
 
