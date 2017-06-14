@@ -11,6 +11,8 @@ import org.bson.conversions.Bson;
 
 import javax.print.Doc;
 
+import java.util.*;
+
 public class HallDB
 {
 	//private Map<String, String> HallMap;
@@ -113,6 +115,47 @@ public class HallDB
 		}
 		return count;
 	}
+	public boolean cancelSeats()
+	{
+		return false;
+	}
+
+	public boolean bookSeat()
+	{
+		return false;
+	}
+
+
+//	public Seat[] getSeats(String HallID, int amount)
+//	{
+//		Seat[] seatList = null;
+//		if(remain(HallID) > amount)
+//		{
+//			MongoCollection<Document> seatCollection= database.getCollection(HallID);
+//			MongoCursor<Document> cursor =  seatCollection.find(eq("occupied", false)).iterator();
+//			seatList = new Seat[amount];
+//			for(int i = 0; i < amount; i++)
+//			{
+//				Document doc = cursor.next();
+//				seatList[i] = new Seat(doc);
+//
+//				// seat set to true
+//				seatCollection.updateOne(eq("id", doc.getString("id")),
+//								         new Document("$set", new Document("occupied", true)));
+//
+//			}
+//		}
+//		return seatList;
+//	}
+
+//	public boolean checkEnough(String HallID, int amount)
+//	{
+//		if(remain(HallID) > amount) {
+//			return true;
+//		}
+//		return false;
+//	}
+
 
 	public Seat[] getSeats(String HallID, int amount)
 	{
@@ -129,12 +172,44 @@ public class HallDB
 
 				// seat set to true
 				seatCollection.updateOne(eq("id", doc.getString("id")),
-								         new Document("$set", new Document("occupied", true)));
+						new Document("$set", new Document("occupied", true)));
 
 			}
 		}
 		return seatList;
 	}
+
+	public ArrayList<Seat> getSpecialSeats(String HallID, int amount, boolean continuous, String area, String row)
+	{
+		ArrayList<Seat> specialSeats = null;
+		if (continuous == false) {
+			MongoCollection<Document> seatCollection= database.getCollection(HallID);
+			if ("none".equals(area)) {
+				MongoCursor<Document> cursor =  seatCollection.find(eq("row", row)).iterator();
+				while (cursor.hasNext()) {
+					specialSeats.add(new Seat(cursor.next()));
+				}
+			} else if ("none".equals(row))  {
+				MongoCursor<Document> cursor =  seatCollection.find(eq("area", area)).iterator();
+				while (cursor.hasNext()) {
+					specialSeats.add(new Seat(cursor.next()));
+				}
+			} else { //two conditions are set
+				Bson myFilter = and(eq("area", area), eq("row", row));
+				MongoCursor<Document> cursor =  seatCollection.find(myFilter).iterator();
+				while (cursor.hasNext()) {
+					specialSeats.add(new Seat(cursor.next()));
+				}
+			}
+		} else {
+			//TODO continuous is set
+
+
+		}
+
+		return specialSeats;
+	}
+
 
 //	public static void main(String[] args)
 //	{
