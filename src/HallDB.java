@@ -3,6 +3,7 @@ import java.util.Map;
 
 import com.mongodb.client.model.Filters;
 import org.bson.Document;
+import org.bson.conversions.Bson;
 
 import com.mongodb.*;
 import com.mongodb.client.*;
@@ -60,7 +61,7 @@ public class HallDB implements Database
 	@Override
 	public Seat queryByID(String hallID)
 	{
-		//return seat object
+		
 		return null;
 	}
 
