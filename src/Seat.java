@@ -13,10 +13,8 @@ public class Seat {
     protected int seatNum;
     protected boolean occupied;
 
-    public Seat(Document doc) {
-        id = doc.getString("id");
-        row = doc.getString("row");
-        seatNum = doc.getInteger("seatNum");
-        occupied = doc.getBoolean("occupied");
-    }
+    public Seat()
+	{
+		
+	}
 }
