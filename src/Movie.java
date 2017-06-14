@@ -23,4 +23,20 @@ public class Movie
         time = doc.getString("time");
         hall = doc.getString("hall");
     }
+
+    public int getAge()
+    {
+        int age;
+        if ("普遍".equals(classification)) {
+           age = 0;
+        } else if ("保護".equals(classification)) {
+            age = 6;
+        } else if ("輔導".equals(classification)) {
+            age = 15;
+        } else {
+            age = 18;
+        }
+        return age;
+    }
+
 }

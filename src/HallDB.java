@@ -1,17 +1,20 @@
 import java.util.HashMap;
 import java.util.Map;
 
-import com.mongodb.client.model.Filters;
+import static com.mongodb.client.model.Filters.*;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
 import com.mongodb.*;
 import com.mongodb.client.*;
 import com.sun.media.jfxmedia.control.VideoDataBuffer;
+import org.bson.conversions.Bson;
 
 import javax.print.Doc;
 
-public class HallDB implements Database
+import java.util.*;
+
+public class HallDB
 {
 	//private Map<String, String> HallMap;
 	private MongoClient mongoClient;
@@ -38,40 +41,38 @@ public class HallDB implements Database
 		switch (hallType)
 		{
 			case BIG_HALL:
-
-				//database.createCollection(generateID(movieId, time));
-
-				//System.out.println(generateID(movieId, time));
-				myCollection = database.getCollection(generateID(movieId, time));
-				System.out.println(myCollection);
+				myCollection = database.getCollection(generateHallID(movieId, time));
 				hallInit(myCollection, HallType.BIG_HALL);
 				break;
 	
 			case SMALL_HALL:
-				myCollection = database.getCollection(generateID(movieId, time));
+				myCollection = database.getCollection(generateHallID(movieId, time));
 				hallInit(myCollection, HallType.SMALL_HALL);
 				break;
 	
 			default:
 				break;
 		}
-
 	}
 
-	@Override
-	public Seat queryByID(String hallID)
+
+	public Seat queryByID(String HallID, String row, int seatNum)
 	{
-		
-		return null;
+		MongoCollection<Document> seatCollection = database.getCollection(HallID);
+		Bson myFilter = and(eq("row", row), eq("seatNum", seatNum));
+		Document doc = seatCollection.find(myFilter).first();
+
+		return new Seat(doc);
 	}
 
-	public String generateID(String movieId, String time)
+
+
+	public String generateHallID(String movieId, String time)
 	{
 		//may change in the future
 		return movieId + time;
 	}
 
-	
 	private void hallInit(MongoCollection<Document> myCollection, HallType hallType)
 	{
 		FindIterable<Document> findIterable;
@@ -106,7 +107,7 @@ public class HallDB implements Database
 	public int remain(String HallID)
 	{
 		MongoCollection<Document> seatCollection= database.getCollection(HallID);
-		MongoCursor<Document> cursor =  seatCollection.find(Filters.eq("occupied", false)).iterator();
+		MongoCursor<Document> cursor =  seatCollection.find(eq("occupied", false)).iterator();
 		int count = 0;
 		while (cursor.hasNext()) {
 			count++;
@@ -115,48 +116,116 @@ public class HallDB implements Database
 		}
 		return count;
 	}
+	public boolean cancelSeats()
+	{
+		return false;
+	}
+
+	public boolean bookSeat()
+	{
+		return false;
+	}
+
+
+//	public Seat[] getSeats(String HallID, int amount)
+//	{
+//		Seat[] seatList = null;
+//		if(remain(HallID) > amount)
+//		{
+//			MongoCollection<Document> seatCollection= database.getCollection(HallID);
+//			MongoCursor<Document> cursor =  seatCollection.find(eq("occupied", false)).iterator();
+//			seatList = new Seat[amount];
+//			for(int i = 0; i < amount; i++)
+//			{
+//				Document doc = cursor.next();
+//				seatList[i] = new Seat(doc);
+//
+//				// seat set to true
+//				seatCollection.updateOne(eq("id", doc.getString("id")),
+//								         new Document("$set", new Document("occupied", true)));
+//
+//			}
+//		}
+//		return seatList;
+//	}
+
+//	public boolean checkEnough(String HallID, int amount)
+//	{
+//		if(remain(HallID) > amount) {
+//			return true;
+//		}
+//		return false;
+//	}
+
 
 	public Seat[] getSeats(String HallID, int amount)
 	{
+		Seat[] seatList = null;
 		if(remain(HallID) > amount)
 		{
 			MongoCollection<Document> seatCollection= database.getCollection(HallID);
-			MongoCursor<Document> cursor =  seatCollection.find(Filters.eq("occupied", false)).iterator();
-			Seat[] seatList = new Seat[amount];
+			MongoCursor<Document> cursor =  seatCollection.find(eq("occupied", false)).iterator();
+			seatList = new Seat[amount];
 			for(int i = 0; i < amount; i++)
 			{
 				Document doc = cursor.next();
-				//seatList[i] = new Seat(doc);
-				// TODO
-				// seat set to false
-				seatCollection.updateOne(Filters.eq("id", doc.getString("id")),
-								         new Document("$set", new Document("occupied", true)));
+				seatList[i] = new Seat(doc);
 
+				// seat set to true
+				seatCollection.updateOne(eq("id", doc.getString("id")),
+						new Document("$set", new Document("occupied", true)));
 
 			}
 		}
-		return null;
+		return seatList;
 	}
 
-
-
-
-	public static void main(String[] args)
+	public ArrayList<Seat> getSpecialSeats(String HallID, int amount, boolean continuous, String area, String row)
 	{
-		HallDB db = new HallDB();
-		//db.createHall("asd", "9:30", HallType.SMALL_HALL);
+		ArrayList<Seat> specialSeats = null;
+		if (continuous == false) {
+			MongoCollection<Document> seatCollection= database.getCollection(HallID);
+			if ("none".equals(area)) {
+				MongoCursor<Document> cursor =  seatCollection.find(eq("row", row)).iterator();
+				while (cursor.hasNext()) {
+					specialSeats.add(new Seat(cursor.next()));
+				}
+			} else if ("none".equals(row))  {
+				MongoCursor<Document> cursor =  seatCollection.find(eq("area", area)).iterator();
+				while (cursor.hasNext()) {
+					specialSeats.add(new Seat(cursor.next()));
+				}
+			} else { //two conditions are set
+				Bson myFilter = and(eq("area", area), eq("row", row));
+				MongoCursor<Document> cursor =  seatCollection.find(myFilter).iterator();
+				while (cursor.hasNext()) {
+					specialSeats.add(new Seat(cursor.next()));
+				}
+			}
+		} else {
+			//TODO continuous is set
 
 
-//		MongoCollection<Document> myCollection
-//				= db.database.getCollection(db.generateID("asd", "9:30"));
-//		myCollection.insertOne(new Document("GG","VERY BIG"));
+		}
 
-		System.out.println(db.remain("jkl9:30"));
-		db.getSeats("jkl9:30", 5);
-
-
-
+		return specialSeats;
 	}
 
 
+//	public static void main(String[] args)
+//	{
+//		HallDB db = new HallDB();
+//		db.createHall("asd", "9:30", HallType.SMALL_HALL);
+//
+//
+//		MongoCollection<Document> myCollection
+//				= db.database.getCollection(db.generateHallID("asd", "9:30"));
+//		myCollection.insertOne(new Document("GG","VERY BIG"));
+//
+//		System.out.println(db.remain("jkl9:30"));
+//		db.getSeats("jkl9:30", 5);
+//
+//
+//
+//	}
 }
