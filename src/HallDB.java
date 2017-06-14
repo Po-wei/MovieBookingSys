@@ -61,8 +61,14 @@ public class HallDB
 		MongoCollection<Document> seatCollection = database.getCollection(HallID);
 		Bson myFilter = and(eq("row", row), eq("seatNum", seatNum));
 		Document doc = seatCollection.find(myFilter).first();
-
-		return new Seat(doc);
+		HallType type = checkHallSize(HallID);
+		Seat seat;
+		if (type == HallType.BIG_HALL) {
+			seat = new BigSeat(doc);
+		} else {
+			seat = new SmallSeat(doc);
+		}
+		return seat;
 	}
 
 
@@ -156,7 +162,21 @@ public class HallDB
 //		}
 //		return false;
 //	}
-
+	private HallType checkHallSize(String HallID)
+	{
+		MongoCollection<Document> seatCollection= database.getCollection(HallID);
+		Document doc = seatCollection.find().first();
+		HallType type;
+		switch (doc.getString("id").charAt(2))
+		{
+			case '1':
+				return HallType.BIG_HALL;
+			case '2':
+				return HallType.SMALL_HALL;
+			default:
+				return null;
+		}
+	}
 
 	public Seat[] getSeats(String HallID, int amount)
 	{
@@ -166,11 +186,15 @@ public class HallDB
 			MongoCollection<Document> seatCollection= database.getCollection(HallID);
 			MongoCursor<Document> cursor =  seatCollection.find(eq("occupied", false)).iterator();
 			seatList = new Seat[amount];
+			HallType type = checkHallSize(HallID);
 			for(int i = 0; i < amount; i++)
 			{
 				Document doc = cursor.next();
-				seatList[i] = new Seat(doc);
-
+				if (type == HallType.BIG_HALL) {
+					seatList[i] = new BigSeat(doc);
+				} else {
+					seatList[i] = new SmallSeat(doc);
+				}
 				// seat set to true
 				seatCollection.updateOne(eq("id", doc.getString("id")),
 						new Document("$set", new Document("occupied", true)));
@@ -182,24 +206,43 @@ public class HallDB
 
 	public ArrayList<Seat> getSpecialSeats(String HallID, int amount, boolean continuous, String area, String row)
 	{
+		HallType type = checkHallSize(HallID);
 		ArrayList<Seat> specialSeats = null;
 		if (continuous == false) {
 			MongoCollection<Document> seatCollection= database.getCollection(HallID);
 			if ("none".equals(area)) {
 				MongoCursor<Document> cursor =  seatCollection.find(eq("row", row)).iterator();
 				while (cursor.hasNext()) {
-					specialSeats.add(new Seat(cursor.next()));
+					Seat seat;
+					if (type == HallType.BIG_HALL) {
+						seat = new BigSeat(cursor.next());
+					} else {
+						seat = new SmallSeat(cursor.next());
+					}
+					specialSeats.add(seat);
 				}
 			} else if ("none".equals(row))  {
 				MongoCursor<Document> cursor =  seatCollection.find(eq("area", area)).iterator();
 				while (cursor.hasNext()) {
-					specialSeats.add(new Seat(cursor.next()));
+					Seat seat;
+					if (type == HallType.BIG_HALL) {
+						seat = new BigSeat(cursor.next());
+					} else {
+						seat = new SmallSeat(cursor.next());
+					}
+					specialSeats.add(seat);
 				}
 			} else { //two conditions are set
 				Bson myFilter = and(eq("area", area), eq("row", row));
 				MongoCursor<Document> cursor =  seatCollection.find(myFilter).iterator();
 				while (cursor.hasNext()) {
-					specialSeats.add(new Seat(cursor.next()));
+					Seat seat;
+					if (type == HallType.BIG_HALL) {
+						seat = new BigSeat(cursor.next());
+					} else {
+						seat = new SmallSeat(cursor.next());
+					}
+					specialSeats.add(seat);
 				}
 			}
 		} else {
