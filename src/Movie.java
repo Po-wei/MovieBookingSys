@@ -23,4 +23,10 @@ public class Movie
         time = doc.getString("time");
         hall = doc.getString("hall");
     }
+
+    public getAge()
+    {
+
+    }
+
 }
