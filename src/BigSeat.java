@@ -5,10 +5,16 @@ import org.bson.Document;
  */
 public class BigSeat extends Seat
 {
-    public BigSeat(Document doc)
+	protected String region;
+	
+	public BigSeat(Document doc)
 	{
-		
+    	id = doc.getString("id");
+        row = doc.getString("row");
+        seatNum = doc.getInteger("seatNum");
+        occupied = doc.getBoolean("occupied");
+        region = doc.getString("region");
 	}
 
-	protected String region;
+	
 }
