@@ -13,11 +13,6 @@ public class UserDB implements Database
 
 	public UserDB()
 	{
-		initialDB();
-	}
-
-	private void initialDB()
-	{
 		this.mongoClient = new MongoClient();
 		this.database = mongoClient.getDatabase("TicketSys");
 		this.userCollection = database.getCollection("user");
@@ -26,8 +21,17 @@ public class UserDB implements Database
 	@Override
 	public User queryByID(String userID)
 	{
-		Document myDoc = userCollection.find(eq("i", 71)).first();
-		return null;
+		int userIndx = Integer.parseInt(userID);
+		Document myDoc = userCollection.find(Filters.eq("index", userIndx)).first();
+		System.out.println(myDoc);
+
+		return new User(myDoc);
+	}
+
+	public static void main(String[] args) {
+		UserDB myUserDB = new UserDB();
+		User myUser = myUserDB.queryByID("3");
+		System.out.println(myUser.name);
 	}
 
 }

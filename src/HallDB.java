@@ -1,11 +1,14 @@
 import java.util.HashMap;
 import java.util.Map;
 
+import com.mongodb.client.model.Filters;
 import org.bson.Document;
 
 import com.mongodb.*;
 import com.mongodb.client.*;
 import com.sun.media.jfxmedia.control.VideoDataBuffer;
+
+import javax.print.Doc;
 
 public class HallDB implements Database
 {
@@ -22,9 +25,10 @@ public class HallDB implements Database
 
 	public HallDB()
 	{
-		// HallMap = new HashMap<String, String>();
-		initialDB();
-		// constructMap();
+		this.mongoClient = new MongoClient();
+		this.database = mongoClient.getDatabase("TicketSys");
+		this.bigRoom = database.getCollection("big_room");
+		this.smallRoom = database.getCollection("small_room");
 	}
 
 	public void createHall(String movieId, String time, HallType hallType)
@@ -56,7 +60,7 @@ public class HallDB implements Database
 	@Override
 	public Seat queryByID(String hallID)
 	{
-
+		//return seat object
 		return null;
 	}
 
@@ -66,17 +70,6 @@ public class HallDB implements Database
 		return movieId + time;
 	}
 
-	/**
-	 * This method will construct Database properly!
-	 * 
-	 */
-	private void initialDB()
-	{
-		this.mongoClient = new MongoClient();
-		this.database = mongoClient.getDatabase("TicketSys");
-		this.bigRoom = database.getCollection("big_room");
-		this.smallRoom = database.getCollection("small_room");
-	}
 	
 	private void hallInit(MongoCollection<Document> myCollection, HallType hallType)
 	{
@@ -90,21 +83,16 @@ public class HallDB implements Database
 				while (mongoCursor.hasNext()) {
 					Document doc = mongoCursor.next();
 					//System.out.println(doc);
-					//myCollection.insertOne(doc);
-
-					//System.out.println(doc.getString("row") + doc.getInteger("seatNum"));
-				myCollection.insertOne(new Document("GG","VERY BIG"));
+					myCollection.insertOne(doc);
 				}
-				//myCollection.insertOne(new Document("GG","VERY BIG"));
 				break;
 
 			case SMALL_HALL:
 				findIterable = this.smallRoom.find();
 				mongoCursor = findIterable.iterator();
 				while (mongoCursor.hasNext()) {
-					//Document doc = mongoCursor.next();
-					//myCollection.insertOne(doc);
-					//myCollection.insertOne(new Document("GG","VERY BIG"));
+					Document doc = mongoCursor.next();
+					myCollection.insertOne(doc);
 				}
 				break;
 
@@ -114,6 +102,43 @@ public class HallDB implements Database
 		}
 	}
 
+	public int remain(String HallID)
+	{
+		MongoCollection<Document> seatCollection= database.getCollection(HallID);
+		MongoCursor<Document> cursor =  seatCollection.find(Filters.eq("occupied", false)).iterator();
+		int count = 0;
+		while (cursor.hasNext()) {
+			count++;
+			cursor.next();
+			System.out.println(count);
+		}
+		return count;
+	}
+
+	public Seat[] getSeats(String HallID, int amount)
+	{
+		if(remain(HallID) > amount)
+		{
+			MongoCollection<Document> seatCollection= database.getCollection(HallID);
+			MongoCursor<Document> cursor =  seatCollection.find(Filters.eq("occupied", false)).iterator();
+			Seat[] seatList = new Seat[amount];
+			for(int i = 0; i < amount; i++)
+			{
+				Document doc = cursor.next();
+				//seatList[i] = new Seat(doc);
+				// TODO
+				// seat set to false
+				seatCollection.updateOne(Filters.eq("id", doc.getString("id")),
+								         new Document("$set", new Document("occupied", true)));
+
+
+			}
+		}
+		return null;
+	}
+
+
+
 
 	public static void main(String[] args)
 	{
@@ -121,9 +146,12 @@ public class HallDB implements Database
 		//db.createHall("asd", "9:30", HallType.SMALL_HALL);
 
 
-		MongoCollection<Document> myCollection
-				= db.database.getCollection(db.generateID("asd", "9:30"));
-		myCollection.insertOne(new Document("GG","VERY BIG"));
+//		MongoCollection<Document> myCollection
+//				= db.database.getCollection(db.generateID("asd", "9:30"));
+//		myCollection.insertOne(new Document("GG","VERY BIG"));
+
+		System.out.println(db.remain("jkl9:30"));
+		db.getSeats("jkl9:30", 5);
 
 
 
