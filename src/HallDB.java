@@ -22,6 +22,7 @@ public class HallDB
 	private MongoCollection<Document> bigRoom;
 	private MongoCollection<Document> smallRoom;
 
+	//nested enum is effectively static
 	public enum HallType
 	{
 		BIG_HALL, SMALL_HALL
@@ -133,28 +134,6 @@ public class HallDB
 	}
 
 
-//	public Seat[] getSeats(String HallID, int amount)
-//	{
-//		Seat[] seatList = null;
-//		if(remain(HallID) > amount)
-//		{
-//			MongoCollection<Document> seatCollection= database.getCollection(HallID);
-//			MongoCursor<Document> cursor =  seatCollection.find(eq("occupied", false)).iterator();
-//			seatList = new Seat[amount];
-//			for(int i = 0; i < amount; i++)
-//			{
-//				Document doc = cursor.next();
-//				seatList[i] = new Seat(doc);
-//
-//				// seat set to true
-//				seatCollection.updateOne(eq("id", doc.getString("id")),
-//								         new Document("$set", new Document("occupied", true)));
-//
-//			}
-//		}
-//		return seatList;
-//	}
-
 //	public boolean checkEnough(String HallID, int amount)
 //	{
 //		if(remain(HallID) > amount) {
@@ -162,6 +141,7 @@ public class HallDB
 //		}
 //		return false;
 //	}
+
 	private HallType checkHallSize(String HallID)
 	{
 		MongoCollection<Document> seatCollection= database.getCollection(HallID);
@@ -254,21 +234,4 @@ public class HallDB
 		return specialSeats;
 	}
 
-
-//	public static void main(String[] args)
-//	{
-//		HallDB db = new HallDB();
-//		db.createHall("asd", "9:30", HallType.SMALL_HALL);
-//
-//
-//		MongoCollection<Document> myCollection
-//				= db.database.getCollection(db.generateHallID("asd", "9:30"));
-//		myCollection.insertOne(new Document("GG","VERY BIG"));
-//
-//		System.out.println(db.remain("jkl9:30"));
-//		db.getSeats("jkl9:30", 5);
-//
-//
-//
-//	}
 }

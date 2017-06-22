@@ -2,19 +2,19 @@ import org.bson.Document;
 
 public class Movie
 {
-    String id;
-    String movie;
-    String url;
-    String classification;
-    String descri;
-    String infor;
-    String score;
-    String time;
-    String hall;
+    protected String id;
+    protected String name;
+    protected String url;
+    protected String classification;
+    protected String descri;
+    protected String infor;
+    protected String score;
+    protected String time;
+    protected String hall;
 
     public Movie(Document doc) {
         id = doc.getString("id");
-        movie = doc.getString("movie");
+        name = doc.getString("movie");
         url = doc.getString("url");
         classification = doc.getString("classification");
         descri = doc.getString("descri");

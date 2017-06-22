@@ -12,9 +12,14 @@ public class Seat {
     protected String row;
     protected int seatNum;
     protected boolean occupied;
+    protected String movieName;
 
     public Seat()
 	{
 		
 	}
+
+    public String getSeat(){
+        return row + "_" + seatNum;
+    }
 }
