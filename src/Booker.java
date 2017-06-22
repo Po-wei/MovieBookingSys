@@ -1,3 +1,5 @@
+import javax.naming.directory.SearchControls;
+
 /**
  * This class handle all booking ticket query
  *
@@ -19,7 +21,7 @@ public class Booker{
 		this.movieDB = movieDB;
 	}
 
-	public void generalBook(String userID, String movieID, String time, int amount) throws BookException{
+	public void generalBook(String userID, String movieID, String time, int amount) {
 		Movie movie = movieDB.queryByID(movieID);
 		User user = userDB.queryByID(userID);
 		String hallID = hallDB.generateHallID(movieID, time);
@@ -53,31 +55,41 @@ public class Booker{
 		}
 	}
 
-	public void conditionalBook(String userID, String movieID, String time, int amount, boolean continuous, String area, String row) throws BookException{
+	public void conditionalBook(String userID, String movieID, String time, int amount, boolean continuous, String area, String row) {
 		Movie movie = movieDB.queryByID(movieID);
-		User user = userDB.queryByID(userid);
+		User user = userDB.queryByID(userID);
 		String hallID = hallDB.generateHallID(movieID, time);
 
 		int newRemain = hallDB.remain(hallID) - amount;
 
 		HallDB.HallType hallType = hallDB.checkHallSize(hallID);
-		if(hallType == HallDB.HallType.SMALL_HALL && !"none".equals(area)) {
-			throw new WrongRegionException();
-		}
-		if(user.age < movie.getAge()) throw new BookException(2,movie.classification,user.age);
-		//在此假設getSpecialSeats會回傳購票好的座位或是null
-		Seat[] bookedSeats = hallDB.getSpecialSeats(hallID, amount, continuous, area, row);
-		if(null == bookedSeats[0]) throw new BookException(1, movieid, time);
-		Ticket[] booked = new Ticket[amount]();
+		try {
+			if (hallType == HallDB.HallType.SMALL_HALL && !"none".equals(area)) {
+				throw new WrongRegionException();
+			}
+			if (user.age < movie.getAge()) {
+				throw new WatchThreeSmallException(movie.classification, user.age);
+			}
+			//在此假設getSpecialSeats會回傳購票好的座位或是null
+			Seat[] bookedSeats = hallDB.getSpecialSeats(hallID, amount, continuous, area, row);
+			if (null == bookedSeats[0]) {
+				throw new SeatNotEnoughException(movieID, time);
+			}
+			Ticket[] booked = new Ticket[amount] ();
+			int i = 0;
+			for(Seat s : bookedSeats){
+				if(i>0) System.out.print(",");
+				Ticket t = ticketDB.createTicket(movie.name, time, s.getSeat(), movie.hall);
+				booked[i++] = t;
+				System.out.print(t.id);
+			}
+			System.out.println("\n"+movieid+"於"+time+"目前仍有"+hall.remain());
+		} catch (WrongRegionException e) {
 
-		int i = 0;
-		for(Seat s : bookedSeats){
-			if(i>0) System.out.print(",");
-			Ticket t = ticketDB.createTicket(movie.name, time, s.getSeat(), movie.hall);
-			booked[i++] = t;
-			System.out.print(t.id);
+		} catch (SeatNotEnoughException e) {
+
+		} catch (WatchThreeSmallException e) {
+
 		}
-		System.out.println("\n"+movieid+"於"+time+"目前仍有"+hall.remain());
-		return null;
 	}
 }

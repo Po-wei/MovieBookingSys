@@ -142,7 +142,7 @@ public class HallDB
 //		return false;
 //	}
 
-	private HallType checkHallSize(String HallID)
+	public HallType checkHallSize(String HallID)
 	{
 		MongoCollection<Document> seatCollection= database.getCollection(HallID);
 		Document doc = seatCollection.find().first();
@@ -184,15 +184,15 @@ public class HallDB
 		return seatList;
 	}
 
-	public ArrayList<Seat> getSpecialSeats(String HallID, int amount, boolean continuous, String area, String row)
+	public Seat[] getSpecialSeats(String HallID, int amount, boolean continuous, String area, String row)
 	{
 		HallType type = checkHallSize(HallID);
 		ArrayList<Seat> specialSeats = null;
+		MongoCollection<Document> seatCollection= database.getCollection(HallID);
 		if (continuous == false) {
-			MongoCollection<Document> seatCollection= database.getCollection(HallID);
 			if ("none".equals(area)) {
 				MongoCursor<Document> cursor =  seatCollection.find(eq("row", row)).iterator();
-				while (cursor.hasNext()) {
+					while (cursor.hasNext()) {
 					Seat seat;
 					if (type == HallType.BIG_HALL) {
 						seat = new BigSeat(cursor.next());
@@ -212,26 +212,161 @@ public class HallDB
 					}
 					specialSeats.add(seat);
 				}
-			} else { //two conditions are set
-				Bson myFilter = and(eq("area", area), eq("row", row));
-				MongoCursor<Document> cursor =  seatCollection.find(myFilter).iterator();
-				while (cursor.hasNext()) {
-					Seat seat;
+			}
+//			else { //two conditions are set
+//				Bson myFilter = and(eq("area", area), eq("row", row));
+//				MongoCursor<Document> cursor =  seatCollection.find(myFilter).iterator();
+//				while (cursor.hasNext()) {
+//					Seat seat;
+//					if (type == HallType.BIG_HALL) {
+//						seat = new BigSeat(cursor.next());
+//					} else {
+//						seat = new SmallSeat(cursor.next());
+//					}
+//					specialSeats.add(seat);
+//				}
+//			}
+		} else { //continuous
+			//TODO continuous is set
+			if ("none".equals(area)) { //specific row
+				MongoCursor<Document> cursor =  seatCollection.find(eq("row", row)).iterator();
+
+				while (cursor.hasNext() && specialSeats.size() < amount) {
+					Document doc = cursor.next();
+					if(type == HallType.SMALL_HALL &&
+							(doc.getInteger("seatNum") == 5 ||
+									doc.getInteger("seatNum") == 13))
+					{
+						specialSeats.clear();
+						if(doc.getBoolean("occupied").equals("false"))
+						{
+							Seat seat;
+							seat = new SmallSeat(cursor.next());
+
+							specialSeats.add(seat);
+						}
+					}
+					else if(doc.getBoolean("occupied").equals("false"))
+					{
+						Seat seat;
+						if (type == HallType.BIG_HALL) {
+							seat = new BigSeat(doc);
+						} else {
+							seat = new SmallSeat(doc);
+						}
+						specialSeats.add(seat);
+					}
+					else
+					{
+						specialSeats.clear();
+					}
+				}
+			}
+			else if ("none".equals(row))  // continuous and specific area
+			{
+				MongoCursor<Document> cursor =  seatCollection.find(eq("area", area)).iterator();
+				Document firstSeat = cursor.next();
+				String currentRow = firstSeat.getString("row"); // first
+				Seat seat;
+				if (firstSeat.getBoolean("occupied") == false) {
 					if (type == HallType.BIG_HALL) {
-						seat = new BigSeat(cursor.next());
+						seat = new BigSeat(firstSeat);
 					} else {
-						seat = new SmallSeat(cursor.next());
+						seat = new SmallSeat(firstSeat);
 					}
 					specialSeats.add(seat);
 				}
-			}
-		} else {
-			//TODO continuous is set
 
+				while (cursor.hasNext() && specialSeats.size() < amount) {
+					Document doc = cursor.next();
+
+					if (!doc.getString("row").equals(currentRow)) {
+						specialSeats.clear();
+					} else {
+						currentRow = doc.getString("row");
+
+						switch (area) {
+							case "blue":
+								if ("H".equals(currentRow) || "I".equals(currentRow) ||
+									"J".equals(currentRow) || "K".equals(currentRow) ||
+									"L".equals(currentRow))
+								{
+									if (doc.getInteger("seatNum") == 30 ||
+											doc.getInteger("seatNum") == 32)
+									{
+										specialSeats.clear();
+										if (doc.getBoolean("occupied").equals("false"))
+										{
+											seat = new BigSeat(doc);
+											specialSeats.add(seat);
+										}
+									}
+
+								}
+								break;
+							case "yellow":
+								if ("I".equals(currentRow) || "J".equals(currentRow))
+								{
+									if (doc.getInteger("seatNum") == 28)
+									{
+										specialSeats.clear();
+										if (doc.getBoolean("occupied").equals("false"))
+										{
+											seat = new BigSeat(doc);
+											specialSeats.add(seat);
+										}
+									}
+								}
+								break;
+							case "gray":
+								if ("H".equals(currentRow) || "I".equals(currentRow) ||
+										"J".equals(currentRow) || "K".equals(currentRow))
+								{
+									if (doc.getInteger("seatNum") == 32)
+									{
+										specialSeats.clear();
+										if (doc.getBoolean("occupied").equals("false"))
+										{
+											seat = new BigSeat(doc);
+											specialSeats.add(seat);
+										}
+									}
+								}
+								else if ("L".equals(currentRow))
+								{
+									if (doc.getInteger("seatNum") == 36)
+									{
+										specialSeats.clear();
+										if (doc.getBoolean("occupied").equals("false"))
+										{
+											seat = new BigSeat(doc);
+											specialSeats.add(seat);
+										}
+									}
+								}
+								break;
+						}
+
+
+						if (doc.getBoolean("occupied").equals("false"))
+						{
+							seat = new BigSeat(doc);
+							specialSeats.add(seat);
+						}
+						else
+						{
+							specialSeats.clear();
+						}
+					}
+				}
+			}
 
 		}
-
-		return specialSeats;
+		if (specialSeats.size() == amount) {
+			return specialSeats.toArray(new Seat[0]);
+		} else {
+			return null;
+		}
 	}
 
 }
