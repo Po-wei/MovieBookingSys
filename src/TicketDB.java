@@ -12,23 +12,24 @@ import com.mongodb.client.model.Filters;
 
 
 public class TicketDB{
-    private MongoClient mongoClient;
-    private MongoDatabase database;
-    private MongoCollection<Document> ticketCollection;
 
-    public TicketDB()
-    {
-        this.mongoClient = new MongoClient();
-        this.database = mongoClient.getDatabase("TicketSys");
-        this.ticketCollection = database.getCollection("ticket");
-    }
+//    private MongoClient mongoClient;
+//    private MongoDatabase database;
+//    private MongoCollection<Document> ticketCollection;
+//
+//    public TicketDB()
+//    {
+//        this.mongoClient = new MongoClient();
+//        this.database = mongoClient.getDatabase("TicketSys");
+//        this.ticketCollection = database.getCollection("ticket");
+//    }
 
-    //private static Map<String, Ticket> tickets = new HashMap<String, Ticket>();
+    private static Map<String, Ticket> tickets = new HashMap<String, Ticket>();
 
     public Ticket createTicket(String name, String time, String info, String hall){
         String id = generateTicketID(name, time, info, hall); //某種生成ID的方法
         Ticket ticket = new Ticket(id, name, time, info, hall);
-        ticket.put(id, ticket);
+        tickets.put(id, ticket);
         return ticket;
     }
 
@@ -37,7 +38,7 @@ public class TicketDB{
     }
 
     public Ticket queryByID(String id) {
-        return ticket.get(id);
+        return tickets.get(id);
     }
 
 }
