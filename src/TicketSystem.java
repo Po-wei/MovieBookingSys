@@ -11,7 +11,7 @@ public class TicketSystem
 
 	public TicketSystem()
 	{
-		myInq = new Inquirier(hallDB, userDB, movieDB);
+		myInq = new Inquirier(ticketDB, hallDB, userDB, movieDB);
 		myRefunder = new Refunder(ticketDB, hallDB, userDB, movieDB);
 		myBooker = new Booker(ticketDB, hallDB, userDB, movieDB);
 	}

@@ -39,4 +39,28 @@ public class Movie
         return age;
     }
 
+    public double getScore()
+    {
+        String tmp[] = score.trim().split("/");
+        return Double.parseDouble(tmp[0]);
+    }
+
+    public String getID()
+    {
+        return id;
+    }
+
+    public int getLength()
+    {
+        String tmp[] = infor.trim().split(":"); //tmp[1] is xxx分
+        String len = tmp[1].substring(0, tmp[1].length() - 1);
+        return Integer.parseInt(len);
+    }
+
+    public String[] getStart()
+    {
+        String tmp[] = time.trim().split("、");
+        return tmp;
+    }
+
 }

@@ -7,7 +7,7 @@ import org.bson.conversions.Bson;
 
 import com.mongodb.*;
 import com.mongodb.client.*;
-import com.sun.media.jfxmedia.control.VideoDataBuffer;
+
 import org.bson.conversions.Bson;
 
 import javax.print.Doc;
@@ -123,15 +123,7 @@ public class HallDB
 		}
 		return count;
 	}
-	public boolean cancelSeats()
-	{
-		return false;
-	}
 
-	public boolean bookSeat()
-	{
-		return false;
-	}
 
 
 //	public boolean checkEnough(String HallID, int amount)
@@ -157,6 +149,7 @@ public class HallDB
 				return null;
 		}
 	}
+
 
 	public Seat[] getSeats(String HallID, int amount)
 	{
@@ -366,6 +359,54 @@ public class HallDB
 			return specialSeats.toArray(new Seat[0]);
 		} else {
 			return null;
+		}
+	}
+
+	public void cancelSeat(Ticket ticket) {
+		String hallID = generateHallID(ticket.movieID, ticket.startTime);
+		HallType type = checkHallSize(hallID);
+		MongoCollection<Document> seatCollection = database.getCollection(hallID);
+
+		String[] seatInfo = ticket.seatInfo.split("_");
+		Bson myFilter = and(eq("row", seatInfo[0]), eq("seatNum", Integer.parseInt(seatInfo[1])));
+		seatCollection.updateOne(myFilter, new Document("$set", new Document("occupied", false)));
+	}
+
+	public boolean checkSpecial(String hallID, int amount, String area, String row)
+	{
+		HallType type = checkHallSize(hallID);
+		ArrayList<Seat> specialSeats = null;
+		MongoCollection<Document> seatCollection= database.getCollection(hallID);
+		if ("none".equals(area)) {
+			MongoCursor<Document> cursor = seatCollection.find(eq("row", row)).iterator();
+			while (cursor.hasNext()) {
+				Seat seat;
+				if (type == HallType.BIG_HALL) {
+					seat = new BigSeat(cursor.next());
+				} else {
+					seat = new SmallSeat(cursor.next());
+				}
+				specialSeats.add(seat);
+			}
+		} else if ("none".equals(row)) {
+			MongoCursor<Document> cursor = seatCollection.find(eq("area", area)).iterator();
+			while (cursor.hasNext()) {
+				Seat seat;
+				if (type == HallType.BIG_HALL) {
+					seat = new BigSeat(cursor.next());
+				} else {
+					seat = new SmallSeat(cursor.next());
+				}
+				specialSeats.add(seat);
+			}
+		}
+		if (specialSeats.size() < amount)
+		{
+			return  false;
+		}
+		else
+		{
+			return  true;
 		}
 	}
 

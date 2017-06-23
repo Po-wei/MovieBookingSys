@@ -41,7 +41,7 @@ public class Booker{
 				if (i > 0) {
 					System.out.print(",");
 				}
-				Ticket t = ticketDB.createTicket(movie.name, time, s.getSeat(), movie.hall);
+				Ticket t = ticketDB.createTicket(movie.name, time, s.getSeat(), movie.hall, movie.id);
 				booked[i++] = t;
 				System.out.print(t.id);
 			}
@@ -75,21 +75,21 @@ public class Booker{
 			if (null == bookedSeats[0]) {
 				throw new SeatNotEnoughException(movieID, time);
 			}
-			Ticket[] booked = new Ticket[amount] ();
+			Ticket[] booked = new Ticket[amount];
 			int i = 0;
 			for(Seat s : bookedSeats){
 				if(i>0) System.out.print(",");
-				Ticket t = ticketDB.createTicket(movie.name, time, s.getSeat(), movie.hall);
+				Ticket t = ticketDB.createTicket(movie.name, time, s.getSeat(), movie.hall, movie.id);
 				booked[i++] = t;
 				System.out.print(t.id);
 			}
-			System.out.println("\n"+movieid+"於"+time+"目前仍有"+hall.remain());
+			System.out.println("\n" + movieID + "於" + time + "目前仍有" + newRemain);
 		} catch (WrongRegionException e) {
-
+			System.out.println(e.getMessage());
 		} catch (SeatNotEnoughException e) {
-
+			System.out.println(e.getMessage());
 		} catch (WatchThreeSmallException e) {
-
+			System.out.println(e.getMessage());
 		}
 	}
 }
