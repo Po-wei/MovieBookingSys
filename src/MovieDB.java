@@ -63,4 +63,16 @@ public class MovieDB implements Database
 		return  movieAllTime;
 	}
 
+	public String getIDByName (String movieName) {
+		Movie[] allMovies = getAllMovies();
+		String movieID = null;
+		for (Movie m : allMovies) {
+			if (m.name.equals(movieName)) {
+				movieID = m.getID();
+				break;
+			}
+		}
+		return movieID;
+	}
+
 }
