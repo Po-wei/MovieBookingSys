@@ -1,13 +1,13 @@
 
 public class TicketSystem
 {
-	private Inquirier myInq;
-	private Refunder myRefunder;
-	private Booker myBooker;
-	private HallDB hallDB;
-	private UserDB userDB;
-	private MovieDB movieDB;
-	private TicketDB ticketDB;
+	public Inquirier myInq;
+	public Refunder myRefunder;
+	public Booker myBooker;
+	public HallDB hallDB;
+	public UserDB userDB;
+	public MovieDB movieDB;
+	public TicketDB ticketDB;
 
 	public TicketSystem()
 	{
