@@ -38,4 +38,29 @@ public class MovieDB implements Database
 		return movieList.toArray(new Movie[0]);
 	}
 
+	public String[] getAllMovieNames() {
+		Movie[] movies = getAllMovies();
+		String[] movieNames = new String[movies.length];
+		int indx = 0;
+		for (Movie m : movies) {
+			movieNames[indx] = m.name;
+			indx++;
+		}
+		return movieNames;
+	}
+
+	public String[] getStartByName(String movieName) {
+		Movie[] allMovies = getAllMovies();
+		String[] movieAllTime = null;
+
+		for (Movie m : allMovies) {
+			if (m.name.equals(movieName)) {
+				movieAllTime = m.getStart();
+				break;
+			}
+		}
+
+		return  movieAllTime;
+	}
+
 }
