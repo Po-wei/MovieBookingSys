@@ -21,40 +21,8 @@ public class Refunder
     }
 
 
-
-
-    private long t2ms(String time){
-        String fuck = time.replace("：",":");
-        SimpleDateFormat f = new SimpleDateFormat("HH:mm");
-        Date d = null;
-        try {
-            d = f.parse(fuck);
-        } catch (ParseException e) {
-            System.out.println(e.getMessage());
-        }
-        return d.getTime();
-    }
-}            hallDB.cancelSeat(ticket);
-        }
-        else message = "退票失敗，退票需於開場時間前20分鐘前";
-        //System.out.println(message);
-
-        String alert = message;
-        return alert;
-    }
-
-    private long t2ms(String time){
-        String fuck = time.replace("：",":");
-        SimpleDateFormat f = new SimpleDateFormat("HH:mm");
-        Date d = null;
-        try {
-            d = f.parse(fuck);
-        } catch (ParseException e) {
-            System.out.println(e.getMessage());
-        }
-        return d.getTime();
-    }
     public String refund(String ticketID){
+        //for test
         DateFormat df = new SimpleDateFormat("HH:mm");
         Date now = new Date();
         Ticket ticket = ticketDB.queryByID(ticketID);
@@ -68,7 +36,22 @@ public class Refunder
         }
         else message = "退票失敗，退票需於開場時間前20分鐘前";
         //System.out.println(message);
-=======
->>>>>>> branch 'master' of https://github.com/jameshuang304/MovieBookingSys.git
+
+        String alert = message;
+        return alert;
+    }
+
+    private long t2ms(String time){
+        //for test
+        String fuck = time.replace("：",":");
+        SimpleDateFormat f = new SimpleDateFormat("HH:mm");
+        Date d = null;
+        try {
+            d = f.parse(fuck);
+        } catch (ParseException e) {
+            System.out.println(e.getMessage());
+        }
+        return d.getTime();
+    }
 
 }
