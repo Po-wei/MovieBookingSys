@@ -12,7 +12,7 @@ public class Seat {
     protected String row;
     protected int seatNum;
     protected boolean occupied;
-    protected String movieName;
+    //protected String movieName;
 
     public Seat()
 	{

@@ -7,13 +7,17 @@ public class Ticket
     String startTime;
     String seatInfo;
     String hall;
+    String movieID;
 
-    Ticket(String id, String movieName, String startTime, String seatInfo, String hall){
+    Ticket(String id, String movieName, String startTime, String seatInfo, String hall, String movieID){
         this.id = id;
         this.movieName = movieName;
         this.startTime = startTime;
         this.seatInfo = seatInfo;
         this.hall = hall;
+        this.movieID = movieID;
     }
+
+
 
 }
