@@ -42,11 +42,16 @@ public class HallDB
 		switch (hallType)
 		{
 			case BIG_HALL:
+
+				myCollection = database.getCollection(generateHallID(movieId, time));
+				myCollection.drop();
 				myCollection = database.getCollection(generateHallID(movieId, time));
 				hallInit(myCollection, HallType.BIG_HALL);
 				break;
 	
 			case SMALL_HALL:
+				myCollection = database.getCollection(generateHallID(movieId, time));
+				myCollection.drop();
 				myCollection = database.getCollection(generateHallID(movieId, time));
 				hallInit(myCollection, HallType.SMALL_HALL);
 				break;
@@ -119,32 +124,24 @@ public class HallDB
 		while (cursor.hasNext()) {
 			count++;
 			cursor.next();
-			System.out.println(count);
+//			System.out.println(count);
 		}
 		return count;
 	}
 
-
-
-//	public boolean checkEnough(String HallID, int amount)
-//	{
-//		if(remain(HallID) > amount) {
-//			return true;
-//		}
-//		return false;
-//	}
 
 	public HallType checkHallSize(String HallID)
 	{
 		MongoCollection<Document> seatCollection= database.getCollection(HallID);
 		Document doc = seatCollection.find().first();
 		HallType type;
-		switch (doc.getString("id").charAt(2))
+//		System.out.println("charat(2) = "+ doc.getString("id").trim().charAt(2));
+		switch (doc.getString("id").trim().charAt(2))
 		{
 			case '1':
-				return HallType.BIG_HALL;
-			case '2':
 				return HallType.SMALL_HALL;
+			case '2':
+				return HallType.BIG_HALL;
 			default:
 				return null;
 		}
@@ -180,22 +177,30 @@ public class HallDB
 	public Seat[] getSpecialSeats(String HallID, int amount, boolean continuous, String area, String row)
 	{
 		HallType type = checkHallSize(HallID);
-		ArrayList<Seat> specialSeats = null;
+		ArrayList<Seat> specialSeats = new ArrayList<Seat>();
 		MongoCollection<Document> seatCollection= database.getCollection(HallID);
-		if (continuous == false) {
+		if (continuous == false)
+		{
 			if ("none".equals(area)) {
-				MongoCursor<Document> cursor =  seatCollection.find(eq("row", row)).iterator();
-					while (cursor.hasNext()) {
+				Bson filter = and(eq("row",row), eq("occupied",false));
+				MongoCursor<Document> cursor =  seatCollection.find(filter).iterator();
+				while (cursor.hasNext() && specialSeats.size() < amount)
+				{
+//					System.out.println("popo");
 					Seat seat;
+					Document doc = cursor.next();
+//					System.out.println("seatNum = " + doc.getInteger("seatNum"));
 					if (type == HallType.BIG_HALL) {
-						seat = new BigSeat(cursor.next());
+						seat = new BigSeat(doc);
 					} else {
-						seat = new SmallSeat(cursor.next());
+						seat = new SmallSeat(doc);
 					}
+
 					specialSeats.add(seat);
 				}
 			} else if ("none".equals(row))  {
-				MongoCursor<Document> cursor =  seatCollection.find(eq("area", area)).iterator();
+				Bson filter = and (eq("region", area), eq("occupied", false));
+				MongoCursor<Document> cursor =  seatCollection.find(filter).iterator();
 				while (cursor.hasNext()) {
 					Seat seat;
 					if (type == HallType.BIG_HALL) {
@@ -257,7 +262,7 @@ public class HallDB
 			}
 			else if ("none".equals(row))  // continuous and specific area
 			{
-				MongoCursor<Document> cursor =  seatCollection.find(eq("area", area)).iterator();
+				MongoCursor<Document> cursor =  seatCollection.find(eq("region", area)).iterator();
 				Document firstSeat = cursor.next();
 				String currentRow = firstSeat.getString("row"); // first
 				Seat seat;
@@ -353,13 +358,48 @@ public class HallDB
 					}
 				}
 			}
-
 		}
+
+
 		if (specialSeats.size() == amount) {
+
+			for (Seat s : specialSeats) {
+				seatCollection.updateOne(eq("id", s.id),
+						new Document("$set", new Document("occupied", true)));
+			}
+
 			return specialSeats.toArray(new Seat[0]);
 		} else {
 			return null;
 		}
+	}
+
+	public int[] getSpecialRemain(String HallID) {
+
+		int[] count = {0,0,0,0}; //gray, blue, yellow, red
+
+		MongoCollection<Document> seatCollection= database.getCollection(HallID);
+		MongoCursor<Document> cursor =  seatCollection.find(eq("occupied", false)).iterator();
+		while (cursor.hasNext()) {
+
+			switch(cursor.next().getString("region")) {
+				case "gray":
+					count[0]++;
+					break;
+				case "blue":
+					count[1]++;
+					break;
+				case "yellow":
+					count[2]++;
+					break;
+				case "red":
+					count[3]++;
+					break;
+				default:
+					System.out.println("I have a big cock!");
+			}
+		}
+		return count;
 	}
 
 	public void cancelSeat(Ticket ticket) {
@@ -375,7 +415,7 @@ public class HallDB
 	public boolean checkSpecial(String hallID, int amount, String area, String row)
 	{
 		HallType type = checkHallSize(hallID);
-		ArrayList<Seat> specialSeats = null;
+		ArrayList<Seat> specialSeats = new ArrayList<>();
 		MongoCollection<Document> seatCollection= database.getCollection(hallID);
 		if ("none".equals(area)) {
 			MongoCursor<Document> cursor = seatCollection.find(eq("row", row)).iterator();

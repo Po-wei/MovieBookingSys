@@ -5,6 +5,7 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 import org.bson.Document;
 
+import javax.lang.model.type.ArrayType;
 import java.util.ArrayList;
 
 import static com.mongodb.client.model.Filters.eq;
@@ -31,7 +32,7 @@ public class MovieDB implements Database
 
 	public Movie[] getAllMovies() {
 		MongoCursor<Document> cursor =  movieCollection.find().iterator();
-		ArrayList<Movie> movieList = null;
+		ArrayList<Movie> movieList = new ArrayList<Movie>();
 		while(cursor.hasNext()) {
 			movieList.add(new Movie(cursor.next()));
 		}

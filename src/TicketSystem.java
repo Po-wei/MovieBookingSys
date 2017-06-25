@@ -4,13 +4,14 @@ public class TicketSystem
 	public Inquirier myInq;
 	public Refunder myRefunder;
 	public Booker myBooker;
-	public HallDB hallDB;
-	public UserDB userDB;
+	private HallDB hallDB;
+	private UserDB userDB;
 	public MovieDB movieDB;
-	public TicketDB ticketDB;
+	private TicketDB ticketDB;
 
 	public TicketSystem()
 	{
+		databaseInit();
 		myInq = new Inquirier(ticketDB, hallDB, userDB, movieDB);
 		myRefunder = new Refunder(ticketDB, hallDB, userDB, movieDB);
 		myBooker = new Booker(ticketDB, hallDB, userDB, movieDB);
@@ -21,8 +22,22 @@ public class TicketSystem
 		userDB = new UserDB();
 		movieDB = new MovieDB();
 		ticketDB = new TicketDB();
+
+//		Movie[] movies = movieDB.getAllMovies();
+//		for(Movie m : movies) {
+//			for (String time : m.getStart()) {
+//
+//			}
+//		}
+
+
+		Movie[] movies = movieDB.getAllMovies();
+		for(Movie m : movies) {
+			for (String time : m.getStart()) {
+				hallDB.createHall(m.id, time, m.getHallType());
+			}
+		}
 	}
 
-
-
 }
+
