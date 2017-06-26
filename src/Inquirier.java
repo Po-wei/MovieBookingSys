@@ -1,3 +1,4 @@
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -41,16 +42,22 @@ public class Inquirier
     public String byTime(int amount, String after, String before, String min, String max){
         String alert = "";
         boolean found = false;
+        DateFormat df = new SimpleDateFormat("HH:mm");
+        Date now = new Date();
+
         for(Movie m : movies){
             String[] starts = m.getStart(); //Movie.getStart()
             String id = m.getID(); //Movie.getID()
             int mlen = m.getLength(); // Movie.getLength();
+
             boolean has = false;
             for(String s : starts){
-                if(!after.equals("")) if(t2ms(after)>t2ms(s)) continue;
-                if(!before.equals("")) if(t2ms(before)<t2ms(s)) continue;
+                if(t2ms(df.format(now))>t2ms(s)) continue;
+                if(!after.equals("：")) if(t2ms(after)>t2ms(s)) continue;
+                if(!before.equals("：")) if(t2ms(before)<t2ms(s)) continue;
                 if(!min.equals("")) if(Integer.parseInt(min)>mlen) continue;
                 if(!max.equals("")) if(Integer.parseInt(max)<mlen) continue;
+
 
                 if(amount > hallDB.remain(hallDB.generateHallID(id, s))) continue;
                 //if(!has) System.out.print(id);
@@ -95,6 +102,8 @@ public class Inquirier
     public String specificSeats(int amount, String area, String row) {
         String alert = "";
         boolean found = false;
+        DateFormat df = new SimpleDateFormat("HH:mm");
+        Date now = new Date();
         for(Movie m : movies){
             String[] starts = m.getStart();
             String id = m.getID(); //Movie.getID()
@@ -102,6 +111,7 @@ public class Inquirier
             for(String s : starts){
                 String hallID = hallDB.generateHallID(id, s);
                 if (!hallDB.checkSpecial(hallID, amount, area, row)) continue;
+                if(t2ms(df.format(now))>t2ms(s)) continue;
                 //if(!has) System.out.print(id);
                 if(!has) alert += id;
                 //System.out.print("，"+s);

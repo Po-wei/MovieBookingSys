@@ -55,7 +55,7 @@ public class Movie
 
         String tmp[] = infor.trim().split("："); //tmp[1] is xxx分
         System.out.println("tmp[1]=" + tmp[1]);
-        String len = tmp[1].substring(0, tmp[1].length() - 2);
+        String len = tmp[1].substring(0, tmp[1].length() - 1);
         System.out.println("len = "+ len);
         return Integer.parseInt(len);
     }

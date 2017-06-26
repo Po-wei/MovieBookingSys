@@ -51,10 +51,10 @@ public class Booker{
 			//System.out.println("\n" + movieID + "於"+ time+"目前仍有"+ newRemain);
 			String nr;
 			HallDB.HallType hallType = hallDB.checkHallSize(hallID);
-			if(hallType == HallDB.HallType.SMALL_HALL) nr = "" + newRemain + "個座位";
+			if(hallType == HallDB.HallType.SMALL_HALL) nr = "" + newRemain ;
 			else{
 				int[] gbyr = hallDB.getSpecialRemain(hallID);
-				nr = "\ngray: " + gbyr[0] + "\nblue:" + gbyr[1] + "\nyellow:" + gbyr[2] + "\nred:" + gbyr[3] + "\n個座位";
+				nr = "\ngray: " + gbyr[0] + "\nblue:" + gbyr[1] + "\nyellow:" + gbyr[2] + "\nred:" + gbyr[3] + "\n";
 			}
 			alert = alert + "\n" + movieID + "於"+ time+"目前仍有"+ nr;
 		} catch (SeatNotEnoughException e) {
@@ -103,10 +103,10 @@ public class Booker{
 			}
 			//System.out.println("\n" + movieID + "於" + time + "目前仍有" + newRemain);
 
-			if(hallType == HallDB.HallType.SMALL_HALL) newRemain = "" + (hallDB.remain(hallID) - amount) + "個座位";
+			if(hallType == HallDB.HallType.SMALL_HALL) newRemain = "" + (hallDB.remain(hallID) - amount) ;
 			else{
 				int[] gbyr = hallDB.getSpecialRemain(hallID);
-				newRemain = "\ngray: " + gbyr[0] + "\nblue:" + gbyr[1] + "\nyellow:" + gbyr[2] + "\nred:" + gbyr[3] + "\n個座位";
+				newRemain = "\ngray: " + gbyr[0] + "\nblue:" + gbyr[1] + "\nyellow:" + gbyr[2] + "\nred:" + gbyr[3] + "\n";
 			}
 
 			alert = alert + "\n" + movieID + "於" + time + "目前仍有" + newRemain;

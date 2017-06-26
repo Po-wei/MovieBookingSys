@@ -7,7 +7,6 @@ import java.util.Date;
 
 public class Refunder
 {
-    //for test
     private TicketDB ticketDB;
     private HallDB hallDB;
     private UserDB userDB;
@@ -22,7 +21,6 @@ public class Refunder
 
 
     public String refund(String ticketID){
-        //for test
         DateFormat df = new SimpleDateFormat("HH:mm");
         Date now = new Date();
         Ticket ticket = ticketDB.queryByID(ticketID);
@@ -42,7 +40,6 @@ public class Refunder
     }
 
     private long t2ms(String time){
-        //for test
         String fuck = time.replace("：",":");
         SimpleDateFormat f = new SimpleDateFormat("HH:mm");
         Date d = null;
@@ -53,5 +50,4 @@ public class Refunder
         }
         return d.getTime();
     }
-
 }

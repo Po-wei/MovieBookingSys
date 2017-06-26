@@ -5,11 +5,10 @@ public class Alert extends JFrame{
 
     Alert(String message){
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setSize(300, 400);
         JPanel panel = new JPanel();
         setContentPane(panel);
 
-        JTextArea textArea = new JTextArea();
+        JTextArea textArea = new JTextArea(30, 50);
         textArea.setLineWrap(true);
         textArea.setText(message);
         panel.add(textArea);
