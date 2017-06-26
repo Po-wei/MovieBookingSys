@@ -87,7 +87,13 @@ public class Booker{
 				throw new WatchThreeSmallException(movie.classification, user.age);
 			}
 			//在此假設getSpecialSeats會回傳購票好的座位或是null
-			Seat[] bookedSeats = hallDB.getSpecialSeats(hallID, amount, continuous, area, row);
+			Seat[] bookedSeats = null;
+			try {
+				bookedSeats = hallDB.getSpecialSeats(hallID, amount, continuous, area, row);
+			}catch (Exception e)
+			{
+			}
+
 			if (null == bookedSeats) {
 				throw new SeatNotEnoughException(movieID, time);
 			}

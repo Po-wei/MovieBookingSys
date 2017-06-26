@@ -174,7 +174,7 @@ public class HallDB
 		return seatList;
 	}
 
-	public Seat[] getSpecialSeats(String HallID, int amount, boolean continuous, String area, String row)
+	public Seat[] getSpecialSeats(String HallID, int amount, boolean continuous, String area, String row) throws Exception
 	{
 		HallType type = checkHallSize(HallID);
 		ArrayList<Seat> specialSeats = new ArrayList<Seat>();
@@ -233,19 +233,19 @@ public class HallDB
 				while (cursor.hasNext() && specialSeats.size() < amount) {
 					Document doc = cursor.next();
 					System.out.println("NOW" + doc.getInteger("seatNum"));
-//					 if (!doc.getString("row").equals(currentRow)) {
-//						 System.out.println("CLEAR TOP");
-//					 	specialSeats.clear();
-//					 	if (type == HallType.BIG_HALL) {
-//					 		seat = new BigSeat(doc);
-//					 	} else {
-//					 		seat = new SmallSeat(doc);
-//					 	}
-//					 	specialSeats.add(seat);
-//					 	lastSeatNum = seat.seatNum;
-//					 }
-//					 else
-					if(doc.getInteger("seatNum") != lastSeatNum +1) {
+					 if (!doc.getString("row").equals(currentRow)) {
+						 System.out.println("CLEAR TOP");
+					 	specialSeats.clear();
+					 	if (type == HallType.BIG_HALL) {
+					 		seat = new BigSeat(doc);
+					 	} else {
+					 		seat = new SmallSeat(doc);
+					 	}
+					 	specialSeats.add(seat);
+					 	lastSeatNum = seat.seatNum;
+					 	currentRow = seat.row;
+					 }
+					 else if(doc.getInteger("seatNum") != lastSeatNum +1) {
 					 	System.out.println("lastSeatNum = " + lastSeatNum);
 					 	System.out.println("doc.getInteger(\"seatNum\")" + doc.getInteger("seatNum"));
 
@@ -258,6 +258,8 @@ public class HallDB
 					 	}
 					 	specialSeats.add(seat);
 					 	lastSeatNum = seat.seatNum;
+					 	currentRow = seat.row;
+
 					 } else if(type == HallType.SMALL_HALL &&
 					 			(doc.getInteger("seatNum") == 5 ||
 					 					doc.getInteger("seatNum") == 13))
@@ -266,6 +268,7 @@ public class HallDB
 					 		specialSeats.clear();
 					 		seat = new SmallSeat(doc);
 					 		specialSeats.add(seat);
+							currentRow = seat.row;
 					 	}
 
 					 else {
@@ -277,16 +280,33 @@ public class HallDB
 						}
 						specialSeats.add(seat);
 						lastSeatNum = seat.seatNum;
+						currentRow = seat.row;
 					}
 
 				}
 
 			} else if ("none".equals(area)) { //specific row
-				MongoCursor<Document> cursor =  seatCollection.find(eq("row", row)).iterator();
+
+				System.out.println("INROW");
+				Bson filter = and(eq("row",row),eq("occupied",false));
+				MongoCursor<Document> cursor =  seatCollection.find(filter).iterator();
+
+				Document firstSeat = cursor.next();
+
+				Seat seat;
+				int lastSeatNum = firstSeat.getInteger("seatNum");
+
+				if (type == HallType.BIG_HALL) {
+					seat = new BigSeat(firstSeat);
+				} else {
+					seat = new SmallSeat(firstSeat);
+				}
+				specialSeats.add(seat);
+				lastSeatNum = seat.seatNum;
 
 				while (cursor.hasNext() && specialSeats.size() < amount) {
 					Document doc = cursor.next();
-
+					System.out.println(doc.getInteger("seatNum"));
 
 
 					if(type == HallType.SMALL_HALL &&
@@ -294,126 +314,82 @@ public class HallDB
 									doc.getInteger("seatNum") == 13))
 					{
 						specialSeats.clear();
-						if(doc.getBoolean("occupied") == false)
-						{
-							Seat seat;
-							seat = new SmallSeat(doc);
+						seat = new SmallSeat(doc);
 
-							specialSeats.add(seat);
-						}
+						specialSeats.add(seat);
+						lastSeatNum = seat.seatNum;
 					}
-					else if(doc.getBoolean("occupied") == false )
-					{
-						Seat seat;
+					else if(doc.getInteger("seatNum") != lastSeatNum +1) {
+//						System.out.println("lastSeatNum = " + lastSeatNum);
+//						System.out.println("doc.getInteger(\"seatNum\")" + doc.getInteger("seatNum"));
+//
+//						System.out.println("CLEAR");
+						specialSeats.clear();
 						if (type == HallType.BIG_HALL) {
 							seat = new BigSeat(doc);
 						} else {
 							seat = new SmallSeat(doc);
 						}
 						specialSeats.add(seat);
+						lastSeatNum = seat.seatNum;
 					}
-					else
-					{
-						specialSeats.clear();
+					else {
+
+						if (type == HallType.BIG_HALL) {
+							seat = new BigSeat(doc);
+						} else {
+							seat = new SmallSeat(doc);
+						}
+						specialSeats.add(seat);
+						lastSeatNum = seat.seatNum;
 					}
 				}
 			}
 			else if ("none".equals(row))  // continuous and specific area
 			{
-				MongoCursor<Document> cursor =  seatCollection.find(eq("region", area)).iterator();
+
+				Bson filter = and(eq("region",area), eq("occupied", false));
+				MongoCursor<Document> cursor =  seatCollection.find(filter).iterator();
 				Document firstSeat = cursor.next();
 				String currentRow = firstSeat.getString("row"); // first
+				int lastSeatNum = firstSeat.getInteger("seatNum");
 				Seat seat;
-				if (firstSeat.getBoolean("occupied") == false) {
-					if (type == HallType.BIG_HALL) {
-						seat = new BigSeat(firstSeat);
-					} else {
-						seat = new SmallSeat(firstSeat);
-					}
-					specialSeats.add(seat);
+
+				if (type == HallType.BIG_HALL) {
+					seat = new BigSeat(firstSeat);
+				} else {
+					seat = new SmallSeat(firstSeat);
 				}
+				specialSeats.add(seat);
+
 
 				while (cursor.hasNext() && specialSeats.size() < amount) {
 					Document doc = cursor.next();
-
+					System.out.println(doc.getInteger("seatNum"));
 					if (!doc.getString("row").equals(currentRow)) {
 						specialSeats.clear();
-					} else {
-						currentRow = doc.getString("row");
-
-						switch (area) {
-							case "blue":
-								if ("H".equals(currentRow) || "I".equals(currentRow) ||
-										"J".equals(currentRow) || "K".equals(currentRow) ||
-										"L".equals(currentRow))
-								{
-									if (doc.getInteger("seatNum") == 30 ||
-											doc.getInteger("seatNum") == 32)
-									{
-										specialSeats.clear();
-										if (doc.getBoolean("occupied") == false)
-										{
-											seat = new BigSeat(doc);
-											specialSeats.add(seat);
-										}
-									}
-
-								}
-								break;
-							case "yellow":
-								if ("I".equals(currentRow) || "J".equals(currentRow))
-								{
-									if (doc.getInteger("seatNum") == 14 || doc.getInteger("seatNum") == 28)
-									{
-										specialSeats.clear();
-										if (doc.getBoolean("occupied") == false)
-										{
-											seat = new BigSeat(doc);
-											specialSeats.add(seat);
-										}
-									}
-								}
-								break;
-							case "gray":
-								if ("H".equals(currentRow) || "I".equals(currentRow) ||
-										"J".equals(currentRow) || "K".equals(currentRow))
-								{
-									if (doc.getInteger("seatNum") == 32)
-									{
-										specialSeats.clear();
-										if (doc.getBoolean("occupied") == false)
-										{
-											seat = new BigSeat(doc);
-											specialSeats.add(seat);
-										}
-									}
-								}
-								else if ("L".equals(currentRow))
-								{
-									if (doc.getInteger("seatNum") == 36)
-									{
-										specialSeats.clear();
-										if (doc.getBoolean("occupied") == false)
-										{
-											seat = new BigSeat(doc);
-											specialSeats.add(seat);
-										}
-									}
-								}
-								break;
-						}
-
-
-						if (doc.getBoolean("occupied") == false)
-						{
-							seat = new BigSeat(doc);
-							specialSeats.add(seat);
-						}
-						else
-						{
-							specialSeats.clear();
-						}
+						System.out.println("CLEARTOP");
+						seat = new BigSeat(doc);
+						specialSeats.add(seat);
+						currentRow = seat.row;
+						lastSeatNum = seat.seatNum;
 					}
+					else if(doc.getInteger("seatNum") != lastSeatNum +1) {
+						specialSeats.clear();
+						System.out.println("CLEAR SEATNUM");
+						seat = new BigSeat(doc);
+						specialSeats.add(seat);
+						currentRow = seat.row;
+						lastSeatNum = seat.seatNum;
+					}
+					else {
+
+						seat = new BigSeat(doc);
+						specialSeats.add(seat);
+						currentRow = seat.row;
+						lastSeatNum = seat.seatNum;
+					}
+
 				}
 			}
 		}
